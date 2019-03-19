@@ -7,11 +7,11 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 # =========================================
 
-PROTOBUF_VERSION = "3.6.1.3"
+PROTOBUF_VERSION = "3.7.0"
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "73fdad358857e120fd0fa19e071a96e15c0f23bb25f85d3f7009abfd4f264a2a",
+    sha256 = "a19dcfe9d156ae45d209b15e0faed5c7b5f109b6117bfc1974b6a7b98a850320",
     strip_prefix = "protobuf-" + PROTOBUF_VERSION,
     url = "https://github.com/google/protobuf/archive/v%s.tar.gz" % PROTOBUF_VERSION,
 )
@@ -139,14 +139,14 @@ node_repositories()
 yarn_modules(
     name = "proto_node_modules",
     deps = {
-        "google-protobuf": "3.6.1",
+        "google-protobuf": "3.7.0",
     },
 )
 
 yarn_modules(
     name = "grpc_node_modules",
     deps = {
-        "google-protobuf": "3.6.1",
+        "google-protobuf": "3.7.0",
         "grpc": "1.15.1",
         "async": "2.6.1",
     },
