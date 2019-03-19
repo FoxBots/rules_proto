@@ -4,20 +4,21 @@ load("@bazel_tools//tools/build_defs/repo:maven_rules.bzl", "maven_jar")
 def github_archive(name, org, repo, ref, sha256):
     """Declare an http_archive from github
     """
+
     # correct github quirk about removing the 'v' in front of tags
     stripRef = ref
-    if stripRef.startswith('v'):
+    if stripRef.startswith("v"):
         stripRef = ref[1:]
 
     if name not in native.existing_rules():
         http_archive(
             name = name,
+            sha256 = sha256,
             strip_prefix = repo + "-" + stripRef,
             urls = [
                 "https://mirror.bazel.build/github.com/%s/%s/archive/%s.tar.gz" % (org, repo, ref),
                 "https://github.com/%s/%s/archive/%s.tar.gz" % (org, repo, ref),
             ],
-            sha256 = sha256,
         )
 
 def jar(name, artifact, sha1):
@@ -111,12 +112,12 @@ def com_github_bazelbuild_bazel_gazelle(**kwargs):
         sha1 = "4bee5cae22da3b948d90293aff01928dd3b9f41a"
         http_archive(
             name = "com_github_bazelbuild_bazel_gazelle",
-            strip_prefix = "bazel-gazelle-" + sha1,
-            url = "https://github.com/bazelbuild/bazel-gazelle/archive/%s.tar.gz" % sha1,
             patch_cmds = [
                 # Expose the go_library targets so we can use it!
                 "sed -i 's|//:__subpackages__|//visibility:public|g' internal/rule/BUILD.bazel",
             ],
+            strip_prefix = "bazel-gazelle-" + sha1,
+            url = "https://github.com/bazelbuild/bazel-gazelle/archive/%s.tar.gz" % sha1,
         )
 
 def boringssl(**kwargs):
@@ -135,21 +136,21 @@ def com_github_nanopb_nanopb(**kwargs):
 
 def com_google_protobuf(**kwargs):
     name = "com_google_protobuf"
-    ref = get_ref(name, "v3.6.1.3", kwargs)
-    sha256 = get_sha256(name, "73fdad358857e120fd0fa19e071a96e15c0f23bb25f85d3f7009abfd4f264a2a", kwargs)
+    ref = get_ref(name, "v3.7.0", kwargs)
+    sha256 = get_sha256(name, "5474d1b83e24ec1a6db371033a27ff7aff412f2b23abba86fedd902330b61ee6", kwargs)
     github_archive(name, "google", "protobuf", ref, sha256)
 
 def com_github_grpc_grpc(**kwargs):
     name = "com_github_grpc_grpc"
-    ref = get_ref(name, "v1.18.0", kwargs)
-    sha256 = get_sha256(name, "069a52a166382dd7b99bf8e7e805f6af40d797cfcee5f80e530ca3fc75fd06e2", kwargs)
+    ref = get_ref(name, "v1.19.1", kwargs)
+    sha256 = get_sha256(name, "f869c648090e8bddaa1260a271b1089caccbe735bf47ac9cd7d44d35a02fb129", kwargs)
     github_archive(name, "grpc", "grpc", ref, sha256)
 
 # NOTE(pcj): Using a different version of dotnet here that seems to have a bad assembly reference.
 # Create an issue for this.
 def io_bazel_rules_dotnet(**kwargs):
     name = "io_bazel_rules_dotnet"
-    ref = get_ref(name, "9713688cf5db211319cc706f0ced0543d01af14c", kwargs) # PR#95
+    ref = get_ref(name, "9713688cf5db211319cc706f0ced0543d01af14c", kwargs)  # PR#95
     sha256 = get_sha256(name, "ad058d0e2f13d1729fcd1ba886ebe6e323e21a1a6fc234a1686471ac8dcd5d7e", kwargs)
     github_archive(name, "bazelbuild", "rules_dotnet", ref, sha256)
 
@@ -204,10 +205,10 @@ def com_github_apple_swift_swift_protobuf(**kwargs):
         version = "86c579d280d629416c7bd9d32a5dfacab8e0b0b4"  # v1.2.0
         http_archive(
             name = "com_github_apple_swift_swift_protobuf",
-            url = "https://github.com/apple/swift-protobuf/archive/%s.tar.gz" % version,
+            build_file = "@build_bazel_rules_swift//third_party:com_github_apple_swift_swift_protobuf/BUILD.overlay",
             sha256 = "edd677ff3ad01a4090902c80e7a28671a2f48fa6ce06726f0616678465f575f1",
             strip_prefix = "swift-protobuf-" + version,
-            build_file = "@build_bazel_rules_swift//third_party:com_github_apple_swift_swift_protobuf/BUILD.overlay",
+            url = "https://github.com/apple/swift-protobuf/archive/%s.tar.gz" % version,
         )
 
 def io_bazel_rules_go(**kwargs):
@@ -222,7 +223,7 @@ def io_bazel_rules_python(**kwargs):
     """python Rules
     """
     name = "io_bazel_rules_python"
-    ref = get_ref(name, "e6399b601e2f72f74e5aa635993d69166784dde1", kwargs) # 2018-12-19
+    ref = get_ref(name, "e6399b601e2f72f74e5aa635993d69166784dde1", kwargs)  # 2018-12-19
     sha256 = get_sha256(name, "2797863749d3266482e156ebe1b7d5cd1893d054ccc8d8ab8b71add5709f5b04", kwargs)
     github_archive(name, "bazelbuild", "rules_python", ref, sha256)
 
@@ -328,9 +329,6 @@ def com_github_scalapb_scalapb(**kwargs):
     if "com_github_scalapb_scalapb" not in native.existing_rules():
         http_archive(
             name = "com_github_scalapb_scalapb",
-            url = "https://github.com/scalapb/ScalaPB/releases/download/v0.8.0/scalapbc-0.8.0.zip",
-            sha256 = "bda0b44b50f0a816342a52c34e6a341b1a792f2a6d26f4f060852f8f10f5d854",
-            strip_prefix = "scalapbc-0.8.0/lib",
             build_file_content = """
 java_import(
     name = "compilerplugin",
@@ -343,6 +341,9 @@ java_import(
     visibility = ["//visibility:public"],
 )
             """,
+            sha256 = "bda0b44b50f0a816342a52c34e6a341b1a792f2a6d26f4f060852f8f10f5d854",
+            strip_prefix = "scalapbc-0.8.0/lib",
+            url = "https://github.com/scalapb/ScalaPB/releases/download/v0.8.0/scalapbc-0.8.0.zip",
         )
 
 def com_github_stackb_grpc_js(**kwargs):
